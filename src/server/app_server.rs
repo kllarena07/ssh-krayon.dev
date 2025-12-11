@@ -1,8 +1,8 @@
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::Arc;
 
 use crossterm::event::KeyCode;
-use rand_core::OsRng;
 use ratatui::backend::CrosstermBackend;
 use ratatui::layout::Rect;
 use ratatui::{Terminal, TerminalOptions, Viewport};
@@ -30,6 +30,22 @@ impl AppServer {
         }
     }
 
+    fn load_host_keys() -> Result<russh::keys::PrivateKey, anyhow::Error> {
+        let key_path = Path::new("authorized_keys/ssh_host_ed25519_key");
+        
+        if !key_path.exists() {
+            return Err(anyhow::anyhow!(
+                "Host key not found at {}. Please generate host keys first.",
+                key_path.display()
+            ));
+        }
+
+        let key = russh::keys::PrivateKey::read_openssh_file(key_path)
+            .map_err(|e| anyhow::anyhow!("Failed to read host key: {}", e))?;
+
+        Ok(key)
+    }
+
     pub async fn run(&mut self) -> Result<(), anyhow::Error> {
         let clients = self.clients.clone();
         tokio::spawn(async move {
@@ -52,15 +68,16 @@ impl AppServer {
         methods.push(MethodKind::None);
 
         println!("Starting SSH server on port 22...");
+        
+        let host_key = Self::load_host_keys()
+            .map_err(|e| anyhow::anyhow!("Failed to load host keys: {}", e))?;
+        
         let config = Config {
             inactivity_timeout: Some(std::time::Duration::from_secs(3600)),
             auth_rejection_time: std::time::Duration::from_secs(3),
             auth_rejection_time_initial: Some(std::time::Duration::from_secs(0)),
             methods,
-            keys: vec![
-                russh::keys::PrivateKey::random(&mut OsRng, russh::keys::Algorithm::Ed25519)
-                    .unwrap(),
-            ],
+            keys: vec![host_key],
             nodelay: true,
             ..Default::default()
         };
