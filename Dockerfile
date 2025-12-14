@@ -10,6 +10,9 @@ COPY Cargo.toml Cargo.lock ./
 # Copy source code
 COPY src ./src
 
+# Copy only the cache file
+COPY hikari-dance/frames_cache.bin ./hikari-dance/frames_cache.bin
+
 # Build the application in release mode
 RUN cargo build --release
 
@@ -37,6 +40,13 @@ WORKDIR /app
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /app/target/release/portfolio-v2 /app/portfolio-v2
+
+# Copy only the cache file to the final image
+COPY --from=builder /app/hikari-dance/frames_cache.bin /app/hikari-dance/frames_cache.bin
+
+# Ensure the cache file is properly treated as a file
+RUN ls -la /app/hikari-dance/frames_cache.bin && \
+    file /app/hikari-dance/frames_cache.bin
 
 # Change ownership to the appuser
 RUN chown -R appuser:appuser /app
