@@ -30,9 +30,9 @@ RUN useradd -m -s /bin/bash appuser
 # Create app directory and authorized_keys directory with SSH key pair
 RUN mkdir -p /app/authorized_keys && \
     cd /app/authorized_keys && \
-    ssh-keygen -t ed25519 -f id_ed25519 -N "" -C "container-generated-key" && \
-    chmod 600 id_ed25519 && \
-    chmod 644 id_ed25519.pub && \
+    ssh-keygen -t ed25519 -f ssh_host_ed25519_key -N "" -C "container-generated-key" && \
+    chmod 600 ssh_host_ed25519_key && \
+    chmod 644 ssh_host_ed25519_key.pub && \
     chown -R appuser:appuser /app/authorized_keys
 
 # Set working directory
