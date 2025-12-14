@@ -1,0 +1,9 @@
+services:
+  portfolio-ssh:
+    build: .
+    ports:
+      - "2222:22" # Forward host port 2222 to container port 22
+    container_name: portfolio-ssh-server
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
