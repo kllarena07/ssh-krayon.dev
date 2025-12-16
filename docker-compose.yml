@@ -5,6 +5,13 @@ services:
       replicas: 5
       restart_policy:
         condition: on-failure
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 1GB
+        reservations:
+          cpus: "0.25"
+          memory: 256M
     ports:
       - "22:22"
     stdin_open: true
