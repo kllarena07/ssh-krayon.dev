@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -32,7 +33,9 @@ impl AppServer {
     }
 
     fn load_host_keys() -> Result<russh::keys::PrivateKey, anyhow::Error> {
-        let key_path = Path::new("authorized_keys/ssh_host_ed25519_key");
+        let secrets_location =
+            env::var("SECRETS_LOCATION").expect("SECRETS_LOCATION was not defined.");
+        let key_path = Path::new(&secrets_location);
 
         if !key_path.exists() {
             return Err(anyhow::anyhow!(
