@@ -6,7 +6,7 @@ services:
       restart_policy:
         condition: on-failure
     ports:
-      - "2222:22"
+      - "22:22"
     stdin_open: true
     tty: true
     secrets:
