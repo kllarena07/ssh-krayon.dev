@@ -1,9 +1,17 @@
 services:
   portfolio-ssh:
-    build: .
+    image: portfolio-ssh:latest
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
     ports:
-      - "2222:22" # Forward host port 2222 to container port 22
-    container_name: portfolio-ssh-server
-    restart: unless-stopped
+      - "2222:22"
     stdin_open: true
     tty: true
+    secrets:
+      - source: host_key
+        target: /run/secret/authorized_keys/id_ed25519
+secrets:
+  host_key:
+    file: ./authorized_keys/id_ed25519
